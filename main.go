@@ -14,6 +14,7 @@ func make_map[T any]() Map[T] {
 	for i, _ := range hashtable.rdyn_array {
 		hashtable.rdyn_array[i] = nil
 	}
+	return hashtable
 }
 
 func main() {
@@ -42,11 +43,11 @@ func main() {
 	slice.destruct()
 
 	var hashtable = make_map[int]()
-	rset_map(&hashtable, []byte("asdf"), 4)
-	rset_map(&hashtable, []byte("qwe"), 77)
-	rset_map(&hashtable, []byte("asdf"), 2)
+	hashtable.set([]byte("asdf"), 4)
+	hashtable.set([]byte("qwe"), 77)
+	hashtable.set([]byte("asdf"), 2)
 
-	fmt.Println(rget_map(&hashtable, []byte("asdf")))
+	fmt.Println(hashtable.get([]byte("asdf")))
 
 	for i := 0; i < 16; i++ {
 		for p_node := hashtable.rdyn_array[i]; p_node != nil; p_node = p_node.next {

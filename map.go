@@ -16,7 +16,7 @@ func FNV32a(bytes []byte) uint32 {
 	return algorithm.Sum32()
 }
 
-func rset_map[V any](hasht *Map[V], key []byte, value V) {
+func (hasht *Map[V]) set(key []byte, value V) {
 	hash := 15 & FNV32a(key)
 	for p_node := hasht.rdyn_array[hash]; p_node != nil; p_node = p_node.next {
 		if bytes.Equal(p_node.data.key, key) {
@@ -29,7 +29,7 @@ func rset_map[V any](hasht *Map[V], key []byte, value V) {
 	hasht.len++
 }
 
-func rget_map[V any](hasht *Map[V], key []byte) V {
+func (hasht *Map[V]) get(key []byte) V {
 	hash := 15 & FNV32a(key)
 	for p_node := hasht.rdyn_array[hash]; p_node != nil; p_node = p_node.next {
 		if bytes.Equal(p_node.data.key, key) {
