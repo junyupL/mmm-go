@@ -1,2 +1,2 @@
 # mmm-go
-Manual memory management in Go similar to C++ new and delete along with manual memory managed list type and dynamic array type with slice as an interface.
+Containers using manual memory management in Go. So far have made minimal versions of dynamic array, linked list, and hash map
