@@ -15,44 +15,23 @@ func FNV32a(bytes []byte) uint32 {
 	algorithm.Write(bytes)
 	return algorithm.Sum32()
 }
-func set_map[V any](hasht *dyn_array[*Node[Pair[V]]], key []byte, value V) {
+
+func rset_map[V any](hasht *Map[V], key []byte, value V) {
 	hash := 15 & FNV32a(key)
-	for p_node := (*hasht)[hash]; p_node != nil; p_node = p_node.next {
+	for p_node := hasht.rdyn_array[hash]; p_node != nil; p_node = p_node.next {
 		if bytes.Equal(p_node.data.key, key) {
 
 			p_node.data.value = value
 			return
 		}
 	}
-	insert(&(*hasht)[hash], 0, Pair[V]{key, value})
+	insert(&hasht.rdyn_array[hash], 0, Pair[V]{key, value})
+	hasht.len++
 }
 
-func rset_map[V any](hasht *rdyn_array[*Node[Pair[V]]], key []byte, value V) {
+func rget_map[V any](hasht *Map[V], key []byte) V {
 	hash := 15 & FNV32a(key)
-	for p_node := (*hasht)[hash]; p_node != nil; p_node = p_node.next {
-		if bytes.Equal(p_node.data.key, key) {
-
-			p_node.data.value = value
-			return
-		}
-	}
-	insert(&(*hasht)[hash], 0, Pair[V]{key, value})
-}
-
-func get_map[V any](hasht *dyn_array[*Node[Pair[V]]], key []byte) V {
-	hash := 15 & FNV32a(key)
-	for p_node := (*hasht)[hash]; p_node != nil; p_node = p_node.next {
-		if bytes.Equal(p_node.data.key, key) {
-
-			return p_node.data.value
-		}
-	}
-	panic("no value for key provided")
-}
-
-func rget_map[V any](hasht *rdyn_array[*Node[Pair[V]]], key []byte) V {
-	hash := 15 & FNV32a(key)
-	for p_node := (*hasht)[hash]; p_node != nil; p_node = p_node.next {
+	for p_node := hasht.rdyn_array[hash]; p_node != nil; p_node = p_node.next {
 		if bytes.Equal(p_node.data.key, key) {
 
 			return p_node.data.value
