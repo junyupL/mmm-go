@@ -11,8 +11,8 @@ func main() {
 	insert(&linkedl, 2, 7)
 	insert(&linkedl, 1, 10)
 
-	for p_node := linkedl; p_node != nil; p_node = p_node.next {
-		fmt.Print(p_node.data, " ")
+	for pNode := linkedl; pNode != nil; pNode = pNode.next {
+		fmt.Print(pNode.data, " ")
 	}
 	fmt.Print("\n")
 	linkedl.Destruct()
@@ -29,16 +29,22 @@ func main() {
 	fmt.Println(slice, len(slice), cap(slice))
 	slice.Destruct()
 
-	var hashtable = make_map[int]()
-	hashtable.set([]byte("asdf"), 4)
-	hashtable.set([]byte("qwe"), 77)
-	hashtable.set([]byte("asdf"), 2)
+	var hashtable = MakeMap[int]()
+	hashtable.Set([]byte("asdf"), 4)
+	hashtable.Set([]byte("qwe"), 77)
+	hashtable.Set([]byte("asdf"), 2)
 
-	fmt.Println(hashtable.get([]byte("asdf")))
+	key := "a"
+	for i := 0; i < 50; i++ {
+		hashtable.Set([]byte(key), i)
+		key += "a"
+	}
+
+	fmt.Println(hashtable.Get([]byte("asdf")))
 
 	for i := 0; i < hashtable.cap; i++ {
-		for p_node := *Advanced(hashtable.pA, i); p_node != nil; p_node = p_node.next {
-			fmt.Println(string(p_node.data.key), p_node.data.value)
+		for pNode := *Advanced(hashtable.pA, i); pNode != nil; pNode = pNode.next {
+			fmt.Println(string(pNode.data.key), pNode.data.value)
 		}
 	}
 

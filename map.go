@@ -26,7 +26,7 @@ type Map[T any] struct {
 	cap int
 }
 
-func make_map[T any]() Map[T] {
+func MakeMap[T any]() Map[T] {
 	hashtable := Map[T]{New[*Node[Pair[T]]](16), 0, 16}
 	for i := 0; i < hashtable.cap; i++ {
 		*Advanced(hashtable.pA, i) = nil
@@ -34,7 +34,7 @@ func make_map[T any]() Map[T] {
 	return hashtable
 }
 
-func (hasht *Map[V]) set(key []byte, value V) {
+func (hasht *Map[V]) Set(key []byte, value V) {
 	if hasht.len == hasht.cap {
 		//resize the hashtable
 		newTable := New[*Node[Pair[V]]](C.ulonglong(hasht.cap * 2))
@@ -42,11 +42,12 @@ func (hasht *Map[V]) set(key []byte, value V) {
 			*Advanced(newTable, i) = nil
 		}
 		for i := 0; i < hasht.cap; i++ {
-			for p_node := *Advanced(hasht.pA, i); p_node != nil; p_node = p_node.next {
+			for pNode := *Advanced(hasht.pA, i); pNode != nil; {
 				//set node to new hashtable
-				hash := uint32(hasht.cap-1) & FNV32a(p_node.data.key)
-
-				insertNode(Advanced(newTable, hash), 0, p_node)
+				hash := uint32(hasht.cap*2-1) & FNV32a(pNode.data.key)
+				tempPNode := pNode
+				pNode = pNode.next
+				insertNode(Advanced(newTable, hash), 0, tempPNode)
 
 			}
 		}
@@ -56,10 +57,11 @@ func (hasht *Map[V]) set(key []byte, value V) {
 
 	}
 	hash := uint32(hasht.cap-1) & FNV32a(key)
-	for p_node := *Advanced(hasht.pA, int(hash)); p_node != nil; p_node = p_node.next {
-		if bytes.Equal(p_node.data.key, key) {
 
-			p_node.data.value = value
+	for pNode := *Advanced(hasht.pA, int(hash)); pNode != nil; pNode = pNode.next {
+		if bytes.Equal(pNode.data.key, key) {
+
+			pNode.data.value = value
 			return
 		}
 	}
@@ -67,12 +69,13 @@ func (hasht *Map[V]) set(key []byte, value V) {
 	hasht.len++
 }
 
-func (hasht *Map[V]) get(key []byte) V {
+func (hasht *Map[V]) Get(key []byte) V {
 	hash := uint32(hasht.cap-1) & FNV32a(key)
-	for p_node := *Advanced(hasht.pA, hash); p_node != nil; p_node = p_node.next {
-		if bytes.Equal(p_node.data.key, key) {
+	for pNode := *Advanced(hasht.pA, hash); pNode != nil; pNode = pNode.next {
 
-			return p_node.data.value
+		if bytes.Equal(pNode.data.key, key) {
+
+			return pNode.data.value
 		}
 	}
 	panic("no value for key provided")
