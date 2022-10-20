@@ -30,24 +30,23 @@ func main() {
 	slice.Destruct()
 
 	var hashtable = MakeMap[int]()
-	hashtable.Set([]byte("asdf"), 4)
-	hashtable.Set([]byte("qwe"), 77)
-	hashtable.Set([]byte("asdf"), 2)
-
+	var avlTree *HeightNode[int] = nil
 	key := "a"
 	for i := 0; i < 50; i++ {
 		hashtable.Set([]byte(key), i)
+		AVLInsert(&avlTree, i)
 		key += "a"
 	}
-
-	fmt.Println(hashtable.Get([]byte("asdf")))
-
 	for i := 0; i < hashtable.cap; i++ {
 		for pNode := *Advanced(hashtable.pA, i); pNode != nil; pNode = pNode.next {
 			fmt.Println(string(pNode.data.key), pNode.data.value)
 		}
 	}
+	fmt.Println(hashtable.Get([]byte("aaa")))
 
+	avlTree.PrintTree()
+
+	avlTree.Destruct()
 	hashtable.Destruct()
 
 }
