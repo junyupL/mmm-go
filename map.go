@@ -26,6 +26,15 @@ type Map[T any] struct {
 	cap int
 }
 
+func For[T any](hashtable Map[T], loop func(pair Pair[T])) {
+	for i := 0; i < hashtable.cap; i++ {
+		for pNode := *Advanced(hashtable.pA, i); pNode != nil; pNode = pNode.next {
+			loop(pNode.data)
+
+		}
+	}
+}
+
 func MakeMap[T any]() Map[T] {
 	hashtable := Map[T]{New[*Node[Pair[T]]](16), 0, 16}
 	for i := 0; i < hashtable.cap; i++ {

@@ -41,12 +41,13 @@ func (pS *DynArray[T]) Append(data T) {
 	pSlice := (*Slice[T])(unsafe.Pointer(pS))
 	if cap(*pS) == 0 {
 		pSlice.cap = 1
+		pSlice.addr = New[T](C.ulonglong(1))
 	} else {
 		pSlice.cap *= 2
+		pSlice.addr = Renew[T](unsafe.Pointer(pSlice.addr), C.ulonglong(cap(*pS)))
 	}
-	pSlice.addr = Renew[T](unsafe.Pointer(pSlice.addr), C.ulonglong(cap(*pS)))
+	*Advanced(pSlice.addr, len(*pS)) = data
 	pSlice.len += 1
-	(*pS)[len(*pS)-1] = data
 
 }
 
