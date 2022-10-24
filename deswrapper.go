@@ -1,10 +1,10 @@
-package main
+package mmm
 
 type Destructable interface {
 	Destruct()
 }
 
-type DesWrapper[T any] struct {
+/*type DesWrapper[T any] struct {
 	ptr *T
 }
 
@@ -20,3 +20,4 @@ func (desWrapper DDesWrapper[T]) Destruct() {
 	(*desWrapper.ptr).Destruct()
 	Delete(desWrapper.ptr)
 }
+*/

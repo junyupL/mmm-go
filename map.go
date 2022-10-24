@@ -1,12 +1,10 @@
-package main
+package mmm
 
-/*
-#include <stdlib.h>
-*/
-import "C"
 import (
 	"bytes"
 	"hash/fnv"
+
+	"github.com/junyupL/mmm-go/memory"
 )
 
 type Pair[V any] struct {
@@ -20,79 +18,80 @@ func FNV32a(bytes []byte) uint32 {
 	return algorithm.Sum32()
 }
 
-type Map[T any] struct {
+type Map[T any, A memory.Allocator] struct {
 	pA  **Node[Pair[T]]
 	len int
 	cap int
+	a   A
 }
 
-func For[T any](hashtable Map[T], loop func(pair Pair[T])) {
+func (hashtable Map[T, A]) For(loop func(pData *Pair[T])) {
 	for i := 0; i < hashtable.cap; i++ {
-		for pNode := *Advanced(hashtable.pA, i); pNode != nil; pNode = pNode.next {
-			loop(pNode.data)
+		for pNode := *memory.Advanced(hashtable.pA, i); pNode != nil; pNode = pNode.next {
+			loop(&pNode.Value)
 
 		}
 	}
 }
 
-func MakeMap[T any]() Map[T] {
-	hashtable := Map[T]{New[*Node[Pair[T]]](16), 0, 16}
+func MakeMap[T any, A memory.Allocator](a A) Map[T, A] {
+	hashtable := Map[T, A]{memory.NewA[*Node[Pair[T]]](a, 16), 0, 16, a}
 	for i := 0; i < hashtable.cap; i++ {
-		*Advanced(hashtable.pA, i) = nil
+		*memory.Advanced(hashtable.pA, i) = nil
 	}
 	return hashtable
 }
 
-func (hasht *Map[V]) Set(key []byte, value V) {
+func (hasht *Map[V, A]) Set(key []byte, value V) {
 	if hasht.len == hasht.cap {
 		//resize the hashtable
-		newTable := New[*Node[Pair[V]]](C.ulonglong(hasht.cap * 2))
+		newTable := memory.NewA[*Node[Pair[V]]](hasht.a, hasht.cap*2)
 		for i := 0; i < hasht.cap*2; i++ {
-			*Advanced(newTable, i) = nil
+			*memory.Advanced(newTable, i) = nil
 		}
 		for i := 0; i < hasht.cap; i++ {
-			for pNode := *Advanced(hasht.pA, i); pNode != nil; {
+			for pNode := *memory.Advanced(hasht.pA, i); pNode != nil; {
 				//set node to new hashtable
-				hash := uint32(hasht.cap*2-1) & FNV32a(pNode.data.key)
+				hash := uint32(hasht.cap*2-1) & FNV32a(pNode.Value.key)
 				tempPNode := pNode
 				pNode = pNode.next
-				insertNode(Advanced(newTable, hash), 0, tempPNode)
+				InsertNode(memory.Advanced(newTable, hash), 0, tempPNode)
 
 			}
 		}
-		Delete(hasht.pA)
+		memory.Delete(hasht.a, hasht.pA)
 		hasht.cap *= 2
 		hasht.pA = newTable
 
 	}
 	hash := uint32(hasht.cap-1) & FNV32a(key)
 
-	for pNode := *Advanced(hasht.pA, int(hash)); pNode != nil; pNode = pNode.next {
-		if bytes.Equal(pNode.data.key, key) {
+	for pNode := *memory.Advanced(hasht.pA, hash); pNode != nil; pNode = pNode.next {
+		if bytes.Equal(pNode.Value.key, key) {
 
-			pNode.data.value = value
+			pNode.Value.value = value
 			return
 		}
 	}
-	insert(Advanced(hasht.pA, hash), 0, Pair[V]{key, value})
+	PushFront(hasht.a, memory.Advanced(hasht.pA, hash), Pair[V]{key, value})
 	hasht.len++
 }
 
-func (hasht *Map[V]) Get(key []byte) V {
+func (hasht *Map[V, A]) Get(key []byte) V {
 	hash := uint32(hasht.cap-1) & FNV32a(key)
-	for pNode := *Advanced(hasht.pA, hash); pNode != nil; pNode = pNode.next {
+	for pNode := *memory.Advanced(hasht.pA, hash); pNode != nil; pNode = pNode.next {
 
-		if bytes.Equal(pNode.data.key, key) {
+		if bytes.Equal(pNode.Value.key, key) {
 
-			return pNode.data.value
+			return pNode.Value.value
 		}
 	}
 	panic("no value for key provided")
 }
 
-func (hasht Map[V]) Destruct() {
+func (hasht Map[V, A]) Destruct() {
 	for i := 0; i < hasht.cap; i++ {
-		(*Advanced(hasht.pA, i)).Destruct()
+		NodeDestruct(hasht.a, *memory.Advanced(hasht.pA, i))
 	}
-	Delete(hasht.pA)
+	memory.Delete(hasht.a, hasht.pA)
 }
